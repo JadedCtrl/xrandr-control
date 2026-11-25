@@ -21,7 +21,7 @@ Add (require 'xrandr-control) to your Emacs configuration (e.g., ~/.emacs or ~/.
 - Select the monitor
 - Choose the direction
 
-### xrand-control-create-mode
+### xrandr-control-create-mode
 
 - Give a name to the mode
 - Choose the width
@@ -32,6 +32,9 @@ Add (require 'xrandr-control) to your Emacs configuration (e.g., ~/.emacs or ~/.
 - Choose a monitor
 - Choose a direction
 - Choose a monitor to move it adjacent to
+
+### xrandr-control-auto-mode
+
 
 ### Execute raw xrandr command
 
