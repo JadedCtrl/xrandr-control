@@ -28,6 +28,11 @@ Add (require 'xrandr-control) to your Emacs configuration (e.g., ~/.emacs or ~/.
 - Choose the height
 - Choose the refresh-rate
 
+### xrandr-control-move-monitor
+- Choose a monitor
+- Choose a direction
+- Choose a monitor to move it adjacent to
+
 ### Execute raw xrandr command
 
 - Call `(xrandr-control-execute "arguments")`
