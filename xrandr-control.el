@@ -81,6 +81,36 @@ y-offset, and primary status."
                   monitors)))
         (nreverse monitors)))))
 
+(defun last-line-p ()
+  (= (line-beginning-position)
+     (save-excursion
+       (forward-line 1)
+       (line-beginning-position))))
+
+(defun xrandr-control-list-modes ()
+  (interactive)
+  (let ((output (xrandr-control-execute "--query"))
+        (modes  nil))
+    (with-temp-buffer
+      (insert output)
+      (goto-char (point-min))
+      (while (and (re-search-forward "^\\([^ ]+\\) \\(dis\\)?connected" nil t)
+                  (not (last-line-p)))
+        (let ((monitor       (match-string 1))
+              (monitor-modes nil))
+          (unless (last-line-p) (beginning-of-line) (next-line))
+          (while (and (looking-at "^ ") (not (last-line-p)))
+            (re-search-forward "^   \\(.*\\) +\\([0-9.]+ *\\)+" nil t)
+            (let ((mode (match-string 1)))
+              (push mode monitor-modes)
+              (print mode)
+            (beginning-of-line)
+            (next-line))
+          (push monitor-modes modes ))))
+    modes))
+
+
+
 (defun xrandr-control-rotate-monitor (display rotation)
   "Rotate the specified DISPLAY to ROTATION.
 DISPLAY is the name of the monitor (e.g., 'eDP-1').
@@ -132,6 +162,17 @@ REFRESH-RATE is in Hz (e.g., 60.0)."
     (xrandr-control-execute args)
     (message "Created new mode %s (%dx%d@%.2fHz)" display-mode-name width height refresh-rate)))
 
+(defun xrandr-control-add-mode (display display-mode-name)
+  (interactive
+   (let* ((monitors (xrandr-control-list-monitors))
+          (modes    (xrandr-control-list-modes)))
+     (display (completing-read "Select monitor: "
+                               (mapcar #'car monitors) nil t))
+     (mode    (cdr (assoc display modes)))))
+  (let ((args (format "--output %s --addmode %s" display mode)))
+    (xrandr-control-execute args)
+    (message "Added mode %s to display %s" mode display)))
+
 (defun xrandr-control-move-monitor (display position other-display)
   "Move the DISPLAY relative to another monitor, OTHER-DISPLAY.
 POSITION is one of 'left-of', 'right-of', 'above', 'below', or 'same-as'."`
@@ -159,6 +200,17 @@ If DISPLAY is disabled, it will be enabled."
   (let ((args (format "--output %s --auto" display)))
     (xrandr-control-execute args)
     (message "Automatically set mode of display %s" display)))
+
+(defun xrandr-control-set-mode (display display-mode-name)
+  (interactive
+   (let* ((monitors (xrandr-control-list-monitors))
+          (modes    (xrandr-control-list-modes)))
+     (display (completing-read "Select monitor: "
+                               (mapcar #'car monitors) nil t))
+     (mode    (cdr (assoc display modes)))))
+  (let ((args (format "--output %s --mode %s" display mode)))
+    (xrandr-control-execute args)
+    (message "Set mode of display %s to %s" display mode)))
 
 (provide 'xrandr-control)
 
